@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="css/editor.css" />
+    <title></title>
+  </head>
+  <body>
+    <div id="settings">
+      <div class="setting-container">
+        <label for="bpm">Tempo (bpm)</label>
+        <input name="bpm" id="bpm" type="number" value="120" />
+      </div>
+
+      <div class="setting-container">
+        <label for="snap-interval">Snap interval (notes per beat)</label>
+        <input
+          name="snap-interval"
+          id="snap-interval"
+          type="number"
+          step="1"
+          min="1"
+          value="1"
+        />
+      </div>
+
+      <div class="setting-container">
+        <label for="duration">Duration (seconds)</label>
+        <input name="duration" id="duration" type="number" value="120" />
+      </div>
+
+      <div class="setting-container">
+        <label for="song">Song</label>
+        <input name="song" id="song" type="url" />
+      </div>
+
+      <div class="setting-container">
+        <label for="import-file">Import Beatmap</label>
+        <input
+          name="import-file"
+          id="import-file"
+          type="file"
+          accept="application/json"
+        />
+      </div>
+
+      <div class="setting-container">
+        <label for="import-midi">Import Midi</label>
+        <input name="import-midi" id="import-midi" type="file" accept=".midi" />
+      </div>
+      <button id="export-button">Export Beatmap</button>
+      <button id="clear-button">Clear</button>
+      <div class="setting-container">
+        <label for="note-width">Note Width</label>
+        <input
+          name="note-width"
+          id="note-width"
+          type="number"
+          step="1"
+          min="1"
+          max="8"
+          value="1"
+        />
+      </div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
