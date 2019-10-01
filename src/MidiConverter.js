@@ -20,17 +20,20 @@ const DIFFICULTY_SETTINGS = Object.freeze({
   easy: {
     noteSize: 2,
     maxIndex: 6,
-    timeThreshold: 0.25 //smallest time in seconds between two consecutive notes
+    timeThreshold: 0.25, //smallest time in seconds between two consecutive notes
+    doubleNoteThreshold: 1 //smallest time in seconds between two consecutive occurences of two notes
   },
   normal: {
     noteSize: 1,
     maxIndex: 7,
-    timeThreshold: 0.16
+    timeThreshold: 0.16,
+    doubleNoteThreshold: 0.5
   },
   hard: {
     noteSize: 1,
     maxIndex: 7,
-    timeThreshold: 0.1
+    timeThreshold: 0.1,
+    doubleNoteThreshold: 0.5
   }
 });
 
@@ -70,10 +73,12 @@ function convert(
 
   const trackR = midi.tracks.find(e => e.name === trackRightHand);
   const trackL = midi.tracks.find(e => e.name === trackLeftHand);
+  trackR.notes.sort((a, b) => a.time - b.time);
   const tracks = [trackR];
   const currentNoteIndices = [0];
   const numNotes = [trackR.notes.length];
   if (trackL) {
+    trackL.notes.sort((a, b) => a.time - b.time);
     tracks.push(trackL);
     currentNoteIndices.push(0);
     numNotes.push(trackL.notes.length);
@@ -88,6 +93,8 @@ function convert(
       adjustMax: settings.maxIndex // maximum value the section notes can be shifted by
     }
   ];
+
+  let lastDouble = Number.NEGATIVE_INFINITY;
   while (true) {
     // check if we've went through all the notes
     if (
@@ -168,16 +175,16 @@ function convert(
         let lastElem = noteMappings[noteMappings.length - 1];
 
         const timeDiff = note.time - lastElem.time;
-        if (timeDiff > 0 && timeDiff < settings.timeThreshold) {
-          if (isOnBeat(lastElem, beatmap.sections[0].bpm)) {
-            break;
-          } else {
+        if (note.time != lastElem.time && timeDiff < settings.timeThreshold) {
+          if (!isOnBeat(lastElem, beatmap.sections[0].bpm)) {
             while (
               noteMappings[noteMappings.length - 1].time === lastElem.time
             ) {
               noteMappings.pop();
             }
             lastElem = noteMappings[noteMappings.length - 1];
+          } else {
+            break;
           }
         }
 
@@ -224,8 +231,16 @@ function convert(
         // avoid duplicate/overlapping notes
         if (
           note.time != lastElem.time ||
-          Math.abs(noteMapping - lastElem.mapping) >= settings.noteWidth
+          Math.abs(noteMapping - lastElem.mapping) >= settings.noteSize
         ) {
+          // check double note threshold
+          if (note.time === lastElem.time) {
+            if (note.time - lastDouble >= settings.doubleNoteThreshold) {
+              lastDouble = note.time;
+            } else {
+              break;
+            }
+          }
           //update adjust indices
           if (!freeNote) {
             if (lastElem.diff != null && diff * lastElem.diff < 0) {
