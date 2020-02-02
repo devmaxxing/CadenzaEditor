@@ -32,7 +32,7 @@ const DIFFICULTY_SETTINGS = Object.freeze({
   hard: {
     noteSize: 1,
     maxIndex: 7,
-    timeThreshold: 0.1,
+    timeThreshold: 0,
     doubleNoteThreshold: 0.5
   }
 });
@@ -61,7 +61,7 @@ function convert(
   const numKeys = settings.maxIndex + 1;
 
   const beatmap = {
-    song: midi.name,
+    song: "",
     sections: [
       {
         bpm: midi.header.tempos[0].bpm,
@@ -176,6 +176,7 @@ function convert(
 
         const timeDiff = note.time - lastElem.time;
         if (note.time != lastElem.time && timeDiff < settings.timeThreshold) {
+          console.log("test");
           if (!isOnBeat(lastElem, beatmap.sections[0].bpm)) {
             while (
               noteMappings[noteMappings.length - 1].time === lastElem.time
@@ -295,13 +296,35 @@ function convert(
     }
   }
 
+  let prevNote = null;
   for (let note of noteMappings) {
-    beatmap.sections[0].notes.push([
+    const newNote = [
       0,
       note.mapping,
-      note.time * 1000,
+      Math.round(note.time * 1000),
       settings.noteSize
-    ]);
+    ];
+    if (prevNote) {
+      const timeDiff = newNote[2] - prevNote[2];
+      if (timeDiff > 0.00001 && timeDiff < 120) {
+        console.log("slide note");
+        newNote[0] = 1;
+        prevNote[0] = 1;
+        const noteDiff = newNote[1] - prevNote[1];
+        //slide notes should just be 1 apart
+        if (Math.abs(noteDiff) > 1) {
+          if (prevNote[1] == 0) {
+            newNote[1] = 1;
+          } else if (prevNote[1] == 7) {
+            newNote[1] = 6;
+          } else {
+            newNote[1] = Math.sign(noteDiff) + prevNote[1];
+          }
+        }
+      }
+    }
+    beatmap.sections[0].notes.push(newNote);
+    prevNote = newNote;
   }
   return beatmap;
 }
