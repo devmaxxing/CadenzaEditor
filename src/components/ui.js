@@ -114,15 +114,16 @@ export default function registerUiHandlers(stateManager) {
 
       for (let note of section.notes) {
         //console.log(note);
+        const noteType = note[0];
+        const noteKey = note[1];
+        const noteTime = note[2];
+        const noteWidth = note[3];
+
         const targetX =
-          (note[2] / 60000) * section.bpm * stateManager.state.beatWidth; //convert time in milliseconds to pixels
+          (noteTime / 60000) * section.bpm * stateManager.state.beatWidth; //convert time in milliseconds to pixels
         const targetY =
-          note[1] * stateManager.graphics.getNoteLaneHeight() + startY;
-        let noteWidth = 1;
-        if (note.length > 3) {
-          noteWidth = note[3];
-        }
-        stateManager.addNote(Note(NOTE_TYPES.HIT, targetX, targetY, noteWidth));
+          noteKey * stateManager.graphics.getNoteLaneHeight() + startY;
+        stateManager.addNote(Note(noteType, targetX, targetY, noteWidth));
       }
     };
     reader.readAsText(file);

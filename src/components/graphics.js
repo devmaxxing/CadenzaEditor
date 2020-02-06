@@ -1,5 +1,6 @@
 import { Graphics, Sprite, Texture } from "pixi.js";
 import { Viewport } from "pixi-viewport";
+import { NOTE_TYPES } from "../constants/note-types";
 
 export const GraphicsManager = app => {
   const overlayGraphics = new Graphics();
@@ -53,7 +54,8 @@ export const GraphicsManager = app => {
     },
 
     destroyNote(noteCoord) {
-      this.sprites[noteCoord].destroy();
+      this.sprites[noteCoord].sprite.destroy();
+      delete this.sprites[noteCoord];
     },
 
     createNote(note) {
@@ -61,14 +63,22 @@ export const GraphicsManager = app => {
       noteSprite.width = 5;
       noteSprite.height = this.getNoteLaneHeight() * note.width;
       noteSprite.tint = 0xffffff;
+      if (note.type == NOTE_TYPES.SLIDE) {
+        noteSprite.tint = 0xffff00;
+      }
       noteSprite.x = note.x - 2;
       noteSprite.y = note.y;
-      this.sprites[note.x + "," + note.y] = noteSprite;
+      this.sprites[note.x + "," + note.y] = {
+        sprite: noteSprite,
+        originalTint: noteSprite.tint
+      };
       this.viewport.addChild(noteSprite);
     },
 
     deselectNote(noteCoord) {
-      this.sprites[noteCoord].tint = 0xffffff;
+      this.sprites[noteCoord].sprite.tint = this.sprites[
+        noteCoord
+      ].originalTint;
     },
 
     selectNote(noteCoord) {
