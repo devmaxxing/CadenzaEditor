@@ -1,7 +1,7 @@
 import { State } from "../models/state";
 import { Note } from "../models/note";
 import { NOTE_TYPES } from "../constants/note-types";
-import findNote from "../utils/binary-search";
+import findNote from "../utils/search";
 
 export const StateManager = (graphics, app) => ({
   state: State(),
@@ -37,25 +37,24 @@ export const StateManager = (graphics, app) => ({
   },
 
   copyNote(noteCoord) {
-    const original = this.state.sections[0].notes[noteCoord];
+    const original = this.state.getNote(noteCoord);
     return Note(original.type, original.x, original.y, original.width);
   },
 
-  deselectNote(noteCoord) {
-    this.graphics.deselectNote(noteCoord);
-    this.state.selectedNotes.delete(noteCoord);
+  deselectNote(note) {
+    this.graphics.deselectNote(note);
+    this.state.selectedNotes.delete(note.getCoordinates());
   },
 
   deselectAllNotes() {
     for (let noteCoord of this.state.selectedNotes) {
-      this.deselectNote(noteCoord);
+      this.deselectNote(this.state.getNote(noteCoord));
     }
   },
 
-  selectNote(x, y) {
-    const noteCoord = x + "," + y;
-    this.graphics.selectNote(noteCoord);
-    this.state.selectedNotes.add(noteCoord);
+  selectNote(note) {
+    this.graphics.selectNote(note);
+    this.state.selectedNotes.add(note.getCoordinates());
   },
 
   addNote(note) {
@@ -70,21 +69,24 @@ export const StateManager = (graphics, app) => ({
     this.graphics.createNote(newNote);
   },
 
-  removeNote(noteCoord) {
-    this.state.deleteNote(noteCoord);
-    this.graphics.destroyNote(noteCoord);
+  removeNote(note) {
+    this.state.deleteNote(note);
+    this.graphics.destroyNote(note);
   },
 
   removeSelectedNotes() {
     for (let noteCoord of this.state.selectedNotes) {
-      this.deselectNote(noteCoord);
-      this.removeNote(noteCoord);
+      const note = this.state.getNote(noteCoord);
+      this.deselectNote(note);
+      this.removeNote(note);
     }
   },
 
   removeAllNotes() {
-    for (let noteCoord of Object.keys(this.state.sections[0].notes)) {
-      this.removeNote(noteCoord);
+    for (let noteMap of this.state.sections[0].notes) {
+      for (let note of Object.values(noteMap)) {
+        this.removeNote(note);
+      }
     }
   },
 
@@ -109,13 +111,19 @@ export const StateManager = (graphics, app) => ({
   },
 
   getNoteUnderCursor() {
+    console.log(this.state);
     const targetPosition = this.graphics.viewport.toWorld(
       this.state.placementPoint.x,
       this.state.placementPoint.y
     );
     targetPosition.x = Number(targetPosition.x.toFixed(4));
-    targetPosition.y = Number(targetPosition.y.toFixed(4));
-    return findNote(targetPosition.x, targetPosition.y, this.state.noteIndex);
+    targetPosition.y = this.graphics.getKeyAtY(targetPosition.y);
+    console.log("Finding note at " + JSON.stringify(targetPosition));
+    return findNote(
+      targetPosition.x,
+      targetPosition.y,
+      this.state.sections[0].notes
+    );
   },
 
   refreshGridLines() {
@@ -132,13 +140,19 @@ export const StateManager = (graphics, app) => ({
     const worldPoint = this.graphics.viewport.toWorld(
       moveData.getLocalPosition(this.app.stage)
     );
-    //find closest snap point
-    const snapX = this.state.beatWidth / this.state.snapInterval;
+
+    let targetWorldX = worldPoint.x;
+
     const snapY = this.graphics.getNoteLaneHeight();
-    let targetWorldX = Math.round(worldPoint.x / snapX) * snapX;
-    let targetWorldY =
+    const targetWorldY =
       Math.round(worldPoint.y / snapY) * snapY -
       this.graphics.viewportOffsetY / 2;
+
+    if (this.state.snapEnabled) {
+      //find closest snap point
+      const snapX = this.state.beatWidth / this.state.snapInterval;
+      targetWorldX = Math.round(worldPoint.x / snapX) * snapX;
+    }
 
     this.state.placementPoint = this.graphics.viewport.toScreen(
       targetWorldX,

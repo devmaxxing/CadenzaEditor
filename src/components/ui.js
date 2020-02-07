@@ -33,18 +33,18 @@ export default function registerUiHandlers(stateManager) {
           bpm: section.bpm,
           duration: section.duration,
           notes: Object.values(section.notes)
-            .map(note => {
-              return [
+            .map(noteMap => {
+              return Object.values(noteMap).map(note => [
                 note.type,
-                (note.y - stateManager.graphics.getStartY()) /
-                  stateManager.graphics.getNoteLaneHeight(),
+                note.y,
                 Math.round(
                   (note.x / stateManager.state.beatWidth / sections[0].bpm) *
                     60000
                 ),
                 note.width
-              ];
+              ]);
             })
+            .reduce((acc, curr) => acc.concat(curr))
             .sort(function(a, b) {
               return a[2] > b[2];
             })
@@ -121,8 +121,7 @@ export default function registerUiHandlers(stateManager) {
 
         const targetX =
           (noteTime / 60000) * section.bpm * stateManager.state.beatWidth; //convert time in milliseconds to pixels
-        const targetY =
-          noteKey * stateManager.graphics.getNoteLaneHeight() + startY;
+        const targetY = noteKey;
         stateManager.addNote(Note(noteType, targetX, targetY, noteWidth));
       }
     };

@@ -1,5 +1,9 @@
 import hotkeys from "hotkeys-js";
 
+/**
+ *
+ * @param {StateManager} stateManager
+ */
 export function registerInputListeners(stateManager) {
   // deselect all
   hotkeys("alt+d", function() {
@@ -21,19 +25,21 @@ export function registerInputListeners(stateManager) {
 
   stateManager.graphics.viewport.addListener("click", e => {
     if (stateManager.state.notePlacementEnabled) {
-      const noteData = stateManager.getNoteUnderCursor();
-      const targetPosition = noteData.noteCoordinates;
-      if (!noteData.result) {
+      const searchResult = stateManager.getNoteUnderCursor();
+      const target = searchResult.target;
+      if (!searchResult.result) {
         if (hotkeys.isPressed("ctrl")) {
-          stateManager.pasteSelection(targetPosition.x, targetPosition.y);
+          stateManager.pasteSelection(target.x, target.y);
         } else {
-          stateManager.addNewNote(targetPosition.x, targetPosition.y);
+          console.log("Adding new note: " + JSON.stringify(searchResult));
+          stateManager.addNewNote(target.x, target.y);
         }
       } else if (hotkeys.isPressed("shift")) {
-        stateManager.selectNote(targetPosition.x, targetPosition.y);
+        stateManager.selectNote(target);
       } else {
+        console.log("Selecting note: " + JSON.stringify(searchResult));
         stateManager.deselectAllNotes();
-        stateManager.selectNote(targetPosition.x, targetPosition.y);
+        stateManager.selectNote(target);
       }
     }
   });

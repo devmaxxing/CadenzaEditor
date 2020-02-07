@@ -31,6 +31,10 @@ export const GraphicsManager = app => {
     overlayGraphics: overlayGraphics,
     sprites: {},
 
+    getKeyAtY(y) {
+      return Math.round((y - this.getStartY()) / this.getNoteLaneHeight());
+    },
+
     getStartY() {
       return -viewport.worldHeight / 2;
     },
@@ -53,36 +57,40 @@ export const GraphicsManager = app => {
       overlayGraphics.endFill();
     },
 
-    destroyNote(noteCoord) {
+    destroyNote(note) {
+      const noteCoord = note.getCoordinates();
       this.sprites[noteCoord].sprite.destroy();
       delete this.sprites[noteCoord];
     },
 
     createNote(note) {
-      const noteSprite = new Sprite(Texture.WHITE);
-      noteSprite.width = 5;
-      noteSprite.height = this.getNoteLaneHeight() * note.width;
-      noteSprite.tint = 0xffffff;
-      if (note.type == NOTE_TYPES.SLIDE) {
-        noteSprite.tint = 0xffff00;
+      if (note.isValid() && !this.sprites[note.getCoordinates()]) {
+        const noteSprite = new Sprite(Texture.WHITE);
+        noteSprite.width = 5;
+        noteSprite.height = this.getNoteLaneHeight() * note.width;
+        noteSprite.tint = 0xffffff;
+        if (note.type == NOTE_TYPES.SLIDE) {
+          noteSprite.tint = 0xffff00;
+        }
+        noteSprite.x = note.x - 2;
+        noteSprite.y = note.y * this.getNoteLaneHeight() + this.getStartY();
+        this.sprites[note.getCoordinates()] = {
+          sprite: noteSprite,
+          originalTint: noteSprite.tint
+        };
+        this.viewport.addChild(noteSprite);
       }
-      noteSprite.x = note.x - 2;
-      noteSprite.y = note.y;
-      this.sprites[note.x + "," + note.y] = {
-        sprite: noteSprite,
-        originalTint: noteSprite.tint
-      };
-      this.viewport.addChild(noteSprite);
     },
 
-    deselectNote(noteCoord) {
+    deselectNote(note) {
+      const noteCoord = note.getCoordinates();
       this.sprites[noteCoord].sprite.tint = this.sprites[
         noteCoord
       ].originalTint;
     },
 
-    selectNote(noteCoord) {
-      this.sprites[noteCoord].tint = 0x0000ff;
+    selectNote(note) {
+      this.sprites[note.getCoordinates()].sprite.tint = 0x0000ff;
     },
 
     zoomX(zoomAmount) {
