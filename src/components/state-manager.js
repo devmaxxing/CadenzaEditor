@@ -59,14 +59,19 @@ export const StateManager = (graphics, app) => ({
 
   addNote(note) {
     this.state.addNote(note);
-    this.graphics.createNote(note);
+    this.graphics.createNote(note, this.state.sections[0].bpm);
   },
 
   // TODO support different note types
   addNewNote(x, y) {
-    const newNote = Note(NOTE_TYPES.HIT, x, y, this.state.currentNoteWidth);
+    const newNote = Note(
+      this.state.currentNoteType,
+      x,
+      y,
+      this.state.currentNoteWidth
+    );
     this.state.addNote(newNote);
-    this.graphics.createNote(newNote);
+    this.graphics.createNote(newNote, this.state.sections[0].bpm);
   },
 
   removeNote(note) {
@@ -88,6 +93,10 @@ export const StateManager = (graphics, app) => ({
         this.removeNote(note);
       }
     }
+  },
+
+  setCurrentNoteType(noteType) {
+    this.state.currentNoteType = noteType;
   },
 
   setCurrentNoteWidth(noteWidth) {
@@ -116,13 +125,16 @@ export const StateManager = (graphics, app) => ({
       this.state.placementPoint.x,
       this.state.placementPoint.y
     );
-    targetPosition.x = Number(targetPosition.x.toFixed(4));
+    const millisecondsPerXUnit =
+      60000 / this.graphics.beatWidth / this.state.sections[0].bpm;
+    targetPosition.x = Math.round(targetPosition.x * millisecondsPerXUnit);
     targetPosition.y = this.graphics.getKeyAtY(targetPosition.y);
     console.log("Finding note at " + JSON.stringify(targetPosition));
     return findNote(
       targetPosition.x,
       targetPosition.y,
-      this.state.sections[0].notes
+      this.state.sections[0].notes,
+      millisecondsPerXUnit
     );
   },
 
@@ -131,7 +143,6 @@ export const StateManager = (graphics, app) => ({
     this.graphics.renderGridLines(
       state.sections[0].bpm,
       state.sections[0].duration,
-      state.beatWidth,
       state.snapInterval
     );
   },
@@ -150,7 +161,7 @@ export const StateManager = (graphics, app) => ({
 
     if (this.state.snapEnabled) {
       //find closest snap point
-      const snapX = this.state.beatWidth / this.state.snapInterval;
+      const snapX = this.graphics.beatWidth / this.state.snapInterval;
       targetWorldX = Math.round(worldPoint.x / snapX) * snapX;
     }
 
@@ -158,7 +169,11 @@ export const StateManager = (graphics, app) => ({
       targetWorldX,
       targetWorldY
     );
-    this.graphics.drawNoteCursor(this.state.placementPoint);
+    this.graphics.drawNoteCursor(
+      this.state.placementPoint,
+      this.state.currentNoteType,
+      this.state.currentNoteWidth
+    );
   },
 
   zoomX(zoomAmount) {

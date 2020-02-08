@@ -15,6 +15,10 @@ export default function registerUiHandlers(stateManager) {
     stateManager.setSnapInterval(parseInt(this.value));
   };
 
+  document.getElementById("note-type-select").onchange = function(e) {
+    stateManager.setCurrentNoteType(parseInt(this.value));
+  };
+
   document.getElementById("note-width").onchange = function(e) {
     stateManager.setCurrentNoteWidth(parseInt(this.value));
   };
@@ -26,6 +30,7 @@ export default function registerUiHandlers(stateManager) {
   document.getElementById("export-button").onclick = function(e) {
     // build the beatmap file
     const sections = stateManager.state.sections;
+    const processedNotes = new Set([]);
     const beatmap = {
       song: document.getElementById("song").value,
       sections: sections.map(section => {
@@ -34,17 +39,20 @@ export default function registerUiHandlers(stateManager) {
           duration: section.duration,
           notes: Object.values(section.notes)
             .map(noteMap => {
-              return Object.values(noteMap).map(note => [
-                note.type,
-                note.y,
-                Math.round(
-                  (note.x / stateManager.state.beatWidth / sections[0].bpm) *
-                    60000
-                ),
-                note.width
-              ]);
+              return Object.values(noteMap).map(note => {
+                if (processedNotes.has(note)) {
+                  return null;
+                }
+                processedNotes.add(note);
+                let arr = [note.type, note.y, note.x, note.width];
+                if (note.type == NOTE_TYPES.HOLD) {
+                  arr.push(Math.round(note.duration + note.x));
+                }
+                return arr;
+              });
             })
             .reduce((acc, curr) => acc.concat(curr))
+            .filter(note => note != null)
             .sort(function(a, b) {
               return a[2] > b[2];
             })
@@ -110,7 +118,6 @@ export default function registerUiHandlers(stateManager) {
 
       document.getElementById("duration").value = section.duration;
       stateManager.setDuration(section.duration);
-      const startY = (-1 * stateManager.graphics.viewport.worldHeight) / 2;
 
       for (let note of section.notes) {
         //console.log(note);
@@ -118,11 +125,13 @@ export default function registerUiHandlers(stateManager) {
         const noteKey = note[1];
         const noteTime = note[2];
         const noteWidth = note[3];
-
-        const targetX =
-          (noteTime / 60000) * section.bpm * stateManager.state.beatWidth; //convert time in milliseconds to pixels
-        const targetY = noteKey;
-        stateManager.addNote(Note(noteType, targetX, targetY, noteWidth));
+        let noteDuration = 0;
+        if (noteType == NOTE_TYPES.HOLD) {
+          noteDuration = note[4] - noteTime;
+        }
+        stateManager.addNote(
+          Note(noteType, noteTime, noteKey, noteWidth, noteDuration)
+        );
       }
     };
     reader.readAsText(file);

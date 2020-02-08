@@ -8,9 +8,15 @@ const SearchResult = (result, target) => ({
  * @param {*} noteX
  * @param {*} noteY
  * @param {*} arr
+ * @param {*} millisecondsPerXUnit
  * @returns { SearchResult }
  */
-export default function findNote(noteX, noteY, noteArray) {
+export default function findNote(
+  noteX,
+  noteY,
+  noteArray,
+  millisecondsPerXUnit
+) {
   const coordinates = { x: noteX, y: noteY };
   if (noteY < 0 || noteY >= noteArray.length) {
     return SearchResult(false, coordinates);
@@ -25,9 +31,16 @@ export default function findNote(noteX, noteY, noteArray) {
       return accumulator;
     }, null);
 
-  if (closestVal && closestVal[1] < 4) {
+  if (closestVal) {
     const note = noteArray[noteY][closestVal[0]];
-    return SearchResult(true, note);
+    const matchThreshold = 4 * millisecondsPerXUnit;
+    if (
+      closestVal[1] < matchThreshold ||
+      (note.x - matchThreshold < noteX &&
+        note.x + note.duration + matchThreshold > noteX)
+    ) {
+      return SearchResult(true, note);
+    }
   }
   return SearchResult(false, coordinates);
 }

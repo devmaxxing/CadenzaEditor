@@ -25,6 +25,7 @@ export const GraphicsManager = app => {
   app.stage.addChild(overlayGraphics);
 
   return {
+    beatWidth: 120,
     viewportOffsetY: 20,
     viewport: viewport,
     graphics: graphics,
@@ -43,37 +44,45 @@ export const GraphicsManager = app => {
       return (this.viewport.worldHeight - this.viewportOffsetY) / 8;
     },
 
-    drawNoteCursor(placementPoint) {
+    drawNoteCursor(placementPoint, noteType, noteWidth) {
       const overlayGraphics = this.overlayGraphics;
       overlayGraphics.clear();
       overlayGraphics.moveTo(placementPoint.x, placementPoint.y);
-      overlayGraphics.beginFill(0xffffff);
+      let fillColor = 0xffffff;
+      if (noteType == NOTE_TYPES.SLIDE) {
+        fillColor = 0xffff00;
+      }
+      overlayGraphics.beginFill(fillColor);
       overlayGraphics.drawRect(
         placementPoint.x - 2,
         placementPoint.y,
         5,
-        this.getNoteLaneHeight()
+        this.getNoteLaneHeight() * noteWidth
       );
       overlayGraphics.endFill();
     },
 
     destroyNote(note) {
       const noteCoord = note.getCoordinates();
-      this.sprites[noteCoord].sprite.destroy();
-      delete this.sprites[noteCoord];
+      if (this.sprites[noteCoord]) {
+        this.sprites[noteCoord].sprite.destroy();
+        delete this.sprites[noteCoord];
+      }
     },
 
-    createNote(note) {
+    createNote(note, bpm) {
       if (note.isValid() && !this.sprites[note.getCoordinates()]) {
+        const xUnitsPerMillisecond = (bpm * this.beatWidth) / 60000;
         const noteSprite = new Sprite(Texture.WHITE);
-        noteSprite.width = 5;
-        noteSprite.height = this.getNoteLaneHeight() * note.width;
+        const noteWidth = note.duration * xUnitsPerMillisecond;
+        noteSprite.width = 5 + noteWidth;
+        noteSprite.height = this.getNoteLaneHeight() * note.width - 2;
         noteSprite.tint = 0xffffff;
         if (note.type == NOTE_TYPES.SLIDE) {
           noteSprite.tint = 0xffff00;
         }
-        noteSprite.x = note.x - 2;
-        noteSprite.y = note.y * this.getNoteLaneHeight() + this.getStartY();
+        noteSprite.x = note.x * xUnitsPerMillisecond - 2.5;
+        noteSprite.y = note.y * this.getNoteLaneHeight() + this.getStartY() + 1;
         this.sprites[note.getCoordinates()] = {
           sprite: noteSprite,
           originalTint: noteSprite.tint
@@ -98,7 +107,7 @@ export const GraphicsManager = app => {
       this.viewport.transform.scale.set(newX, 1);
     },
 
-    renderGridLines(bpm, duration, beatWidth, snapInterval) {
+    renderGridLines(bpm, duration, snapInterval) {
       if (bpm && duration) {
         const graphics = this.graphics;
         const viewport = this.viewport;
@@ -110,7 +119,7 @@ export const GraphicsManager = app => {
 
         // calculate map width
         const numBeats = (bpm / 60) * duration;
-        const mapWidth = beatWidth * numBeats;
+        const mapWidth = this.beatWidth * numBeats;
         viewport.worldWidth = mapWidth;
         viewport.clamp({
           left: -25,
@@ -133,7 +142,7 @@ export const GraphicsManager = app => {
         );
         const endY = startY + noteSize * 8;
         const numLines = numBeats * snapInterval;
-        const intervalSize = beatWidth / snapInterval;
+        const intervalSize = this.beatWidth / snapInterval;
         for (let i = 0; i < numLines; i += 1) {
           let x = i * intervalSize;
           graphics.moveTo(x, startY);

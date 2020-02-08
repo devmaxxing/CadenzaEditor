@@ -1,10 +1,11 @@
 import { Point } from "pixi.js";
+import { NOTE_TYPES } from "../constants/note-types";
 
 export const State = () => ({
   snapEnabled: false,
   snapInterval: 1,
-  beatWidth: 120,
   currentNoteWidth: 1,
+  currentNoteType: NOTE_TYPES.HIT,
   notePlacementEnabled: true,
   sections: [
     {
@@ -19,12 +20,22 @@ export const State = () => ({
 
   addNote(note) {
     if (note.isValid()) {
-      this.sections[0].notes[note.y][note.x] = note;
+      for (let i = 0; i < note.width; i++) {
+        this.sections[0].notes[note.y + i][note.x] = note;
+        if (note.type == NOTE_TYPES.HOLD) {
+          this.sections[0].notes[note.y + i][note.x + note.duration] = note;
+        }
+      }
     }
   },
 
   deleteNote(note) {
-    delete this.sections[0].notes[note.y][note.x];
+    for (let i = 0; i < note.width; i++) {
+      delete this.sections[0].notes[note.y + i][note.x];
+      if (note.type == NOTE_TYPES.HOLD) {
+        delete this.sections[0].notes[note.y + i][note.x + note.duration];
+      }
+    }
   },
 
   getNote(noteCoord) {
