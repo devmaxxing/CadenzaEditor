@@ -119,6 +119,7 @@ export const StateManager = (graphics, app, ui) => ({
   },
 
   removeAllNotes() {
+    this.deselectAllNotes();
     for (let noteMap of this.state.sections[0].notes) {
       for (let note of Object.values(noteMap)) {
         this.removeNote(note);
