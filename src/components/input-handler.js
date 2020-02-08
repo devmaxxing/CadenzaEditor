@@ -6,13 +6,18 @@ import hotkeys from "hotkeys-js";
  */
 export function registerInputListeners(stateManager) {
   // deselect all
-  hotkeys("alt+d", function() {
+  hotkeys("d", function(event) {
     stateManager.deselectAllNotes();
   });
 
   // remove selected
-  hotkeys("alt+r", function() {
+  hotkeys("delete", function(event) {
     stateManager.removeSelectedNotes();
+  });
+
+  // toggle snap
+  hotkeys("s", function(event) {
+    stateManager.toggleSnap();
   });
 
   document.addEventListener("wheel", e => {

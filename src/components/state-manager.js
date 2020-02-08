@@ -164,5 +164,9 @@ export const StateManager = (graphics, app) => ({
   zoomX(zoomAmount) {
     this.graphics.zoomX(zoomAmount);
     this.refreshGridLines();
+  },
+
+  toggleSnap() {
+    this.state.snapEnabled = !this.state.snapEnabled;
   }
 });
