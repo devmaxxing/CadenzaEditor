@@ -7,13 +7,13 @@
     <title></title>
   </head>
   <body>
-    <div id="settings">
-      <div class="setting-container">
+    <div id="settings" class="ui-panel">
+      <div class="container">
         <label for="bpm">Tempo (bpm)</label>
         <input name="bpm" id="bpm" value="120" />
       </div>
 
-      <div class="setting-container">
+      <div class="container">
         <label for="snap-interval">Snap interval (notes per beat)</label>
         <input
           name="snap-interval"
@@ -25,17 +25,17 @@
         />
       </div>
 
-      <div class="setting-container">
+      <div class="container">
         <label for="duration">Duration (seconds)</label>
         <input name="duration" id="duration" value="120" />
       </div>
 
-      <div class="setting-container">
+      <div class="container">
         <label for="song">Song</label>
         <input name="song" id="song" />
       </div>
 
-      <div class="setting-container">
+      <div class="container">
         <label for="import-file">Import Beatmap</label>
         <input
           name="import-file"
@@ -45,13 +45,13 @@
         />
       </div>
 
-      <div class="setting-container">
+      <div class="container">
         <label for="import-midi">Import Midi</label>
         <input name="import-midi" id="import-midi" type="file" accept=".midi" />
       </div>
       <button id="export-button">Export Beatmap</button>
       <button id="clear-button">Clear</button>
-      <div class="setting-container">
+      <div class="container">
         <label for="note-width">Note Width</label>
         <input
           name="note-width"
@@ -63,7 +63,7 @@
           value="1"
         />
       </div>
-      <div class="setting-container">
+      <div class="container">
         <label for="note-type-select">Note Type</label>
         <select id="note-type-select">
           <option selected value="0">Hit Note</option>
@@ -72,6 +72,47 @@
         </select>
       </div>
     </div>
+    <div id="note-settings" class="ui-panel">
+      <div class="container">
+        <b>Note Properties</b>
+      </div>
+      <div class="container">
+        <label for="selected-note-type">Note Type</label>
+        <select id="selected-note-type" disabled>
+          <option selected value="0">Hit Note</option>
+          <option value="1">Slide Note</option>
+          <option value="2">Hold Note</option>
+        </select>
+      </div>
+      <div class="container">
+        <label for="selected-note-width">Width</label>
+        <input
+          id="selected-note-width"
+          type="number"
+          step="1"
+          min="1"
+          max="8"
+          value="1"
+          readonly
+          disabled
+        />
+      </div>
+      <div class="container">
+        <label for="selected-note-start-time">Start Time (ms)</label>
+        <input
+          id="selected-note-start-time"
+          type="number"
+          readonly
+          min="0"
+          disabled
+        />
+      </div>
+      <div class="container">
+        <label for="selected-note-duration">Duration (ms)</label>
+        <input id="selected-note-duration" type="number" min="0" disabled />
+      </div>
+    </div>
+
     <script src="main.js"></script>
   </body>
 </html>

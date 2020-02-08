@@ -22,10 +22,41 @@ export const State = () => ({
     if (note.isValid()) {
       for (let i = 0; i < note.width; i++) {
         this.sections[0].notes[note.y + i][note.x] = note;
-        if (note.type == NOTE_TYPES.HOLD) {
+        if (note.type == NOTE_TYPES.HOLD && note.duration > 0) {
           this.sections[0].notes[note.y + i][note.x + note.duration] = note;
         }
       }
+    }
+  },
+
+  hasNote(note) {
+    return (
+      note.isValid() && this.sections[0].notes[note.y].hasOwnProperty(note.x)
+    );
+  },
+
+  updateNoteType(note, noteType) {
+    if (this.hasNote(note) && note.type != noteType) {
+      if (note.type == NOTE_TYPES.HOLD && note.duration > 0) {
+        for (let i = 0; i < note.width; i++) {
+          delete this.sections[0].notes[note.y + i][note.x + note.duration];
+        }
+        note.duration = 0;
+      }
+
+      note.type = noteType;
+    }
+  },
+
+  updateNoteDuration(note, newDuration) {
+    if (this.hasNote(note) && note.type == NOTE_TYPES.HOLD) {
+      for (let i = 0; i < note.width; i++) {
+        if (note.duration > 0) {
+          delete this.sections[0].notes[note.y + i][note.x + note.duration];
+        }
+        this.sections[0].notes[note.y + i][note.x + newDuration] = note;
+      }
+      note.duration = newDuration;
     }
   },
 

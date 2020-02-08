@@ -1,7 +1,7 @@
-#settings {
-    display: flex;
+.ui-panel {
+  display: flex;
 }
 
-.setting-container {
-    padding: 10px;
+.container {
+  padding: 10px;
 }

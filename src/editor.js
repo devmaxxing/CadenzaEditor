@@ -1,8 +1,8 @@
 import { Application } from "pixi.js";
 import { GraphicsManager } from "./components/graphics";
 import * as InputHandler from "./components/input-handler";
-import registerUiHandlers from "./components/ui";
 import { StateManager } from "./components/state-manager";
+import { UI } from "./components/ui";
 
 const app = new Application({
   height: 640,
@@ -13,17 +13,12 @@ document.body.appendChild(app.view);
 // Init graphics
 const graphics = GraphicsManager(app);
 
+const ui = UI();
+
 // Init state
-const stateManager = StateManager(graphics, app);
-stateManager.setBpm(document.getElementById("bpm").value);
-stateManager.setDuration(document.getElementById("duration").value);
-stateManager.setSnapInterval(
-  parseInt(document.getElementById("snap-interval").value)
-);
-stateManager.setCurrentNoteWidth(
-  parseInt(document.getElementById("note-width").value)
-);
+const stateManager = StateManager(graphics, app, ui);
+ui.init(stateManager);
+
 stateManager.refreshGridLines();
 
 InputHandler.registerInputListeners(stateManager);
-registerUiHandlers(stateManager);

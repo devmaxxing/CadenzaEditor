@@ -1,10 +1,12 @@
 import { State } from "../models/state";
 import { Note } from "../models/note";
-import { NOTE_TYPES } from "../constants/note-types";
 import findNote from "../utils/search";
+import { UI } from "./ui";
+import { NOTE_TYPES } from "../constants/note-types";
 
-export const StateManager = (graphics, app) => ({
+export const StateManager = (graphics, app, ui) => ({
   state: State(),
+  ui: ui,
   graphics,
   app,
 
@@ -44,17 +46,46 @@ export const StateManager = (graphics, app) => ({
   deselectNote(note) {
     this.graphics.deselectNote(note);
     this.state.selectedNotes.delete(note.getCoordinates());
+    if (this.state.selectedNotes.size == 1) {
+      this.ui.setSelectedNote(note);
+    } else {
+      this.ui.setSelectedNotesDisabled(true);
+    }
   },
 
   deselectAllNotes() {
     for (let noteCoord of this.state.selectedNotes) {
       this.deselectNote(this.state.getNote(noteCoord));
     }
+    this.ui.setSelectedNotesDisabled(true);
   },
 
   selectNote(note) {
     this.graphics.selectNote(note);
     this.state.selectedNotes.add(note.getCoordinates());
+    if (this.state.selectedNotes.size == 1) {
+      this.ui.setSelectedNote(note);
+    } else {
+      this.ui.setSelectedNotesDisabled(true);
+    }
+  },
+
+  setSelectedNoteType(type) {
+    for (let noteCoord of this.state.selectedNotes) {
+      const note = this.state.getNote(noteCoord);
+      this.state.updateNoteType(note, type);
+      this.graphics.updateNote(note, this.state.sections[0].bpm);
+    }
+  },
+
+  setSelectedNoteDuration(duration) {
+    for (let noteCoord of this.state.selectedNotes) {
+      const note = this.state.getNote(noteCoord);
+      if (note.type == NOTE_TYPES.HOLD) {
+        this.state.updateNoteDuration(note, duration);
+        this.graphics.updateNote(note, this.state.sections[0].bpm);
+      }
+    }
   },
 
   addNote(note) {

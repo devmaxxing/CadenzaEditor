@@ -72,16 +72,11 @@ export const GraphicsManager = app => {
 
     createNote(note, bpm) {
       if (note.isValid() && !this.sprites[note.getCoordinates()]) {
-        const xUnitsPerMillisecond = (bpm * this.beatWidth) / 60000;
         const noteSprite = new Sprite(Texture.WHITE);
-        const noteWidth = note.duration * xUnitsPerMillisecond;
-        noteSprite.width = 5 + noteWidth;
+        noteSprite.width = 5 + this.getNoteWidth(note, bpm);
         noteSprite.height = this.getNoteLaneHeight() * note.width - 2;
-        noteSprite.tint = 0xffffff;
-        if (note.type == NOTE_TYPES.SLIDE) {
-          noteSprite.tint = 0xffff00;
-        }
-        noteSprite.x = note.x * xUnitsPerMillisecond - 2.5;
+        noteSprite.tint = this.getNoteTint(note);
+        noteSprite.x = note.x * this.getXUnitsPerMillisecond(bpm) - 2.5;
         noteSprite.y = note.y * this.getNoteLaneHeight() + this.getStartY() + 1;
         this.sprites[note.getCoordinates()] = {
           sprite: noteSprite,
@@ -100,6 +95,29 @@ export const GraphicsManager = app => {
 
     selectNote(note) {
       this.sprites[note.getCoordinates()].sprite.tint = 0x0000ff;
+    },
+
+    updateNote(note, bpm) {
+      const noteCoord = note.getCoordinates();
+      if (this.sprites[noteCoord]) {
+        this.sprites[noteCoord].originalTint = this.getNoteTint(note);
+        this.sprites[noteCoord].sprite.width = 5 + this.getNoteWidth(note, bpm);
+      }
+    },
+
+    getXUnitsPerMillisecond(bpm) {
+      return (bpm * this.beatWidth) / 60000;
+    },
+
+    getNoteWidth(note, bpm) {
+      return note.duration * this.getXUnitsPerMillisecond(bpm);
+    },
+
+    getNoteTint(note) {
+      if (note.type == NOTE_TYPES.SLIDE) {
+        return 0xffff00;
+      }
+      return 0xffffff;
     },
 
     zoomX(zoomAmount) {
