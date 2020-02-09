@@ -9,6 +9,9 @@
   <body>
     <div id="settings" class="ui-panel">
       <div class="container">
+        <b>Beatmap Properties</b>
+      </div>
+      <div class="container">
         <label for="bpm">Tempo (bpm)</label>
         <input name="bpm" id="bpm" value="120" />
       </div>
@@ -36,6 +39,14 @@
       </div>
 
       <div class="container">
+        <button id="clear-button">Clear Notes</button>
+      </div>
+    </div>
+    <div id="Import/Export" class="ui-panel">
+      <div class="container">
+        <b>Import/Export</b>
+      </div>
+      <div class="container">
         <label for="import-file">Import Beatmap</label>
         <input
           name="import-file"
@@ -45,12 +56,18 @@
         />
       </div>
 
-      <div class="container">
+      <!-- <div class="container">
         <label for="import-midi">Import Midi</label>
         <input name="import-midi" id="import-midi" type="file" accept=".midi" />
+      </div> -->
+      <div class="container">
+        <button id="export-button">Export Beatmap</button>
       </div>
-      <button id="export-button">Export Beatmap</button>
-      <button id="clear-button">Clear</button>
+    </div>
+    <div id="note-creation" class="ui-panel">
+      <div class="container">
+        <b>Note Creation</b>
+      </div>
       <div class="container">
         <label for="note-width">Note Width</label>
         <input
@@ -63,6 +80,7 @@
           value="1"
         />
       </div>
+
       <div class="container">
         <label for="note-type-select">Note Type</label>
         <select id="note-type-select">
@@ -110,6 +128,27 @@
       <div class="container">
         <label for="selected-note-duration">Duration (ms)</label>
         <input id="selected-note-duration" type="number" min="0" disabled />
+      </div>
+    </div>
+    <div id="audio-panel" class="ui-panel">
+      <div class="container">
+        <b>Audio</b>
+      </div>
+      <div class="container">
+        <label for="import-audio">Import Audio File</label>
+        <input
+          name="import-audio"
+          id="import-audio"
+          type="file"
+          accept="audio/*"
+        />
+      </div>
+      <div class="container">
+        <button id="audio-play-button">Play</button>
+      </div>
+      <div class="container">
+        <label for="current-audio-time">Current Audio Time (ms)</label>
+        <input id="current-audio-time" type="number" min="0" readonly />
       </div>
     </div>
 

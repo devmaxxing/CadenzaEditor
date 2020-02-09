@@ -3,7 +3,35 @@ import { Note } from "../models/note";
 import { NOTE_TYPES } from "../constants/note-types";
 
 export const UI = () => ({
+  audio: new Audio(),
   init(stateManager) {
+    this.audio.addEventListener("timeupdate", () => {
+      stateManager.setAudioTime(this.audio.currentTime);
+      document.getElementById("current-audio-time").value =
+        this.audio.currentTime * 1000;
+
+      if (this.audio.ended) {
+        document.getElementById("current-audio-time").value = 0;
+        document.getElementById("audio-play-button").innerText = "Play";
+      }
+    });
+
+    document.getElementById("audio-play-button").onclick = () => {
+      if (this.audio.paused) {
+        this.audio.play();
+        document.getElementById("audio-play-button").innerText = "Pause";
+      } else {
+        this.audio.pause();
+        document.getElementById("audio-play-button").innerText = "Play";
+      }
+    };
+
+    document.getElementById("import-audio").onchange = () => {
+      this.audio.src = URL.createObjectURL(
+        document.getElementById("import-audio").files[0]
+      );
+    };
+
     document.getElementById("selected-note-type").onchange = function() {
       stateManager.setSelectedNoteType(parseInt(this.value));
     };

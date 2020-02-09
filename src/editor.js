@@ -17,7 +17,7 @@ const ui = UI();
 
 // Init state
 const stateManager = StateManager(graphics, app, ui);
-ui.init(stateManager);
+stateManager.init();
 
 stateManager.refreshGridLines();
 

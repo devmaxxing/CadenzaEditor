@@ -55,5 +55,6 @@ export function registerInputListeners(stateManager) {
 
   stateManager.graphics.viewport.on("drag-end", () => {
     stateManager.state.notePlacementEnabled = true;
+    stateManager.setAudioTimeFromViewportPosition();
   });
 }

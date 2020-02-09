@@ -1,8 +1,9 @@
-import { Graphics, Sprite, Texture } from "pixi.js";
+import { Graphics, Sprite, Texture, Point } from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { NOTE_TYPES } from "../constants/note-types";
 
 export const GraphicsManager = app => {
+  const fixedGraphics = new Graphics();
   const overlayGraphics = new Graphics();
   const graphics = new Graphics();
   const viewport = new Viewport({
@@ -22,7 +23,13 @@ export const GraphicsManager = app => {
 
   viewport.addChild(graphics);
   app.stage.addChild(viewport);
+  app.stage.addChild(fixedGraphics);
   app.stage.addChild(overlayGraphics);
+
+  // draw audio line
+  fixedGraphics.lineStyle(1, 0xffffff);
+  fixedGraphics.moveTo(25, 0);
+  fixedGraphics.lineTo(25, viewport.worldHeight);
 
   return {
     beatWidth: 120,
@@ -125,6 +132,13 @@ export const GraphicsManager = app => {
       this.viewport.transform.scale.set(newX, 1);
     },
 
+    setViewportMilliseconds(milliseconds, bpm) {
+      const prevCorner = this.viewport.corner;
+      const xOffset = -25;
+      const targetX = milliseconds * this.getXUnitsPerMillisecond(bpm);
+      this.viewport.moveCorner(new Point(targetX + xOffset, prevCorner.y));
+    },
+
     renderGridLines(bpm, duration, snapInterval) {
       if (bpm && duration) {
         const graphics = this.graphics;
@@ -137,7 +151,7 @@ export const GraphicsManager = app => {
 
         // calculate map width
         const numBeats = (bpm / 60) * duration;
-        const mapWidth = this.beatWidth * numBeats;
+        const mapWidth = this.beatWidth * numBeats + viewport.screenWidth;
         viewport.worldWidth = mapWidth;
         viewport.clamp({
           left: -25,

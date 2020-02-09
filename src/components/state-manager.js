@@ -6,9 +6,23 @@ import { NOTE_TYPES } from "../constants/note-types";
 
 export const StateManager = (graphics, app, ui) => ({
   state: State(),
+  audioTime: 0,
   ui: ui,
   graphics,
   app,
+
+  init() {
+    ui.init(this);
+    app.ticker.add(() => {
+      if (!this.ui.audio.paused && this.state.sections[0].bpm) {
+        this.audioTime += app.ticker.elapsedMS;
+        this.graphics.setViewportMilliseconds(
+          this.audioTime,
+          this.state.sections[0].bpm
+        );
+      }
+    });
+  },
 
   pasteSelection(x, y) {
     if (this.state.selectedNotes.size > 0) {
@@ -215,5 +229,17 @@ export const StateManager = (graphics, app, ui) => ({
 
   toggleSnap() {
     this.state.snapEnabled = !this.state.snapEnabled;
+  },
+
+  setAudioTime(seconds) {
+    this.audioTime = seconds * 1000;
+  },
+
+  setAudioTimeFromViewportPosition() {
+    const viewportX = this.graphics.viewport.corner.x + 25;
+    this.ui.audio.currentTime =
+      viewportX /
+      this.graphics.getXUnitsPerMillisecond(this.state.sections[0].bpm) /
+      1000;
   }
 });
