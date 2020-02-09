@@ -54,7 +54,13 @@ export const StateManager = (graphics, app, ui) => ({
 
   copyNote(noteCoord) {
     const original = this.state.getNote(noteCoord);
-    return Note(original.type, original.x, original.y, original.width);
+    return Note(
+      original.type,
+      original.x,
+      original.y,
+      original.width,
+      original.duration
+    );
   },
 
   deselectNote(note) {
