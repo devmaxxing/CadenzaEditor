@@ -20,6 +20,11 @@ export function registerInputListeners(stateManager) {
     stateManager.toggleSnap();
   });
 
+  // select next
+  hotkeys("shift+right", function(event) {
+    stateManager.selectNext();
+  });
+
   document.addEventListener("wheel", e => {
     stateManager.zoomX(0.01 * e.deltaY);
   });

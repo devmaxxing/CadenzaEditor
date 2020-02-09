@@ -63,32 +63,21 @@ export const UI = () => ({
     document.getElementById("export-button").onclick = function(e) {
       // build the beatmap file
       const sections = stateManager.state.sections;
-      const processedNotes = new Set([]);
       const beatmap = {
         song: document.getElementById("song").value,
-        sections: sections.map(section => {
+        sections: sections.map((section, i) => {
           let obj = {
             bpm: section.bpm,
             duration: section.duration,
-            notes: Object.values(section.notes)
-              .map(noteMap => {
-                return Object.values(noteMap).map(note => {
-                  if (processedNotes.has(note)) {
-                    return null;
-                  }
-                  processedNotes.add(note);
-                  let arr = [note.type, note.y, note.x, note.width];
-                  if (note.type == NOTE_TYPES.HOLD) {
-                    arr.push(Math.round(note.duration + note.x));
-                  }
-                  return arr;
-                });
-              })
-              .reduce((acc, curr) => acc.concat(curr))
-              .filter(note => note != null)
-              .sort(function(a, b) {
-                return a[2] > b[2];
-              })
+            notes: stateManager.state
+              .getSortedNoteArray(i)
+              .map(note => [
+                note.type,
+                note.y,
+                note.x,
+                note.width,
+                note.x + note.duration
+              ])
           };
           return obj;
         })

@@ -90,6 +90,31 @@ export const StateManager = (graphics, app, ui) => ({
     }
   },
 
+  selectNext() {
+    const sortedNotes = this.state.getSortedNoteArray(0);
+    if (sortedNotes.length > 0) {
+      let bottomRight = null;
+      for (let noteCoord of this.state.selectedNotes) {
+        const noteCoordArr = noteCoord.split(",").map(str => Number(str));
+        if (
+          !bottomRight ||
+          noteCoordArr[0] > bottomRight[0] ||
+          (noteCoordArr[0] == bottomRight[0] &&
+            noteCoordArr[1] > bottomRight[1])
+        ) {
+          bottomRight = noteCoordArr;
+        }
+      }
+
+      const nextNoteIndex = bottomRight
+        ? sortedNotes.indexOf(this.state.getNote(bottomRight.join(","))) + 1
+        : 0;
+      if (sortedNotes.length > nextNoteIndex) {
+        this.selectNote(sortedNotes[nextNoteIndex]);
+      }
+    }
+  },
+
   setSelectedNoteType(type) {
     for (let noteCoord of this.state.selectedNotes) {
       const note = this.state.getNote(noteCoord);

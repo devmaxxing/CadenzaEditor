@@ -77,5 +77,21 @@ export const State = () => ({
       return this.sections[0].notes[y][x];
     }
     return null;
+  },
+
+  getSortedNoteArray(sectionNumber) {
+    const processedNotes = new Set([]);
+    for (let noteMap of this.sections[sectionNumber].notes) {
+      for (let note of Object.values(noteMap)) {
+        processedNotes.add(note);
+      }
+    }
+
+    return Array.from(processedNotes).sort(function(a, b) {
+      if (a.x == b.x) {
+        return a.y > b.y;
+      }
+      return a.x > b.x;
+    });
   }
 });
