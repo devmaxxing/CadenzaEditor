@@ -109,6 +109,8 @@ export const GraphicsManager = app => {
       if (this.sprites[noteCoord]) {
         this.sprites[noteCoord].originalTint = this.getNoteTint(note);
         this.sprites[noteCoord].sprite.width = 5 + this.getNoteWidth(note, bpm);
+        this.sprites[noteCoord].sprite.height =
+          this.getNoteLaneHeight() * note.width - 2;
       }
     },
 

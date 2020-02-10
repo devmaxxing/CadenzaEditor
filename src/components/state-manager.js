@@ -66,9 +66,7 @@ export const StateManager = (graphics, app, ui) => ({
   deselectNote(note) {
     this.graphics.deselectNote(note);
     this.state.selectedNotes.delete(note.getCoordinates());
-    if (this.state.selectedNotes.size == 1) {
-      this.ui.setSelectedNote(note);
-    } else {
+    if (this.state.selectedNotes.size == 0) {
       this.ui.setSelectedNotesDisabled(true);
     }
   },
@@ -85,9 +83,8 @@ export const StateManager = (graphics, app, ui) => ({
     this.state.selectedNotes.add(note.getCoordinates());
     if (this.state.selectedNotes.size == 1) {
       this.ui.setSelectedNote(note);
-    } else {
-      this.ui.setSelectedNotesDisabled(true);
     }
+    this.ui.setSelectedNotesDisabled(false);
   },
 
   selectNext() {
@@ -112,6 +109,14 @@ export const StateManager = (graphics, app, ui) => ({
       if (sortedNotes.length > nextNoteIndex) {
         this.selectNote(sortedNotes[nextNoteIndex]);
       }
+    }
+  },
+
+  setSelectedNoteWidth(width) {
+    for (let noteCoord of this.state.selectedNotes) {
+      const note = this.state.getNote(noteCoord);
+      this.state.updateNoteWidth(note, width);
+      this.graphics.updateNote(note, this.state.sections[0].bpm);
     }
   },
 

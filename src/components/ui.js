@@ -40,6 +40,10 @@ export const UI = () => ({
       stateManager.setSelectedNoteDuration(parseInt(this.value));
     };
 
+    document.getElementById("selected-note-width").onchange = function() {
+      stateManager.setSelectedNoteWidth(parseInt(this.value));
+    };
+
     document.getElementById("bpm").onchange = function(e) {
       stateManager.setBpm(parseFloat(this.value));
     };

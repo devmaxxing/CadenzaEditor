@@ -35,6 +35,28 @@ export const State = () => ({
     );
   },
 
+  updateNoteWidth(note, width) {
+    if (this.hasNote(note) && note.width != width) {
+      if (note.width > width) {
+        for (let i = 1; i < note.width; i++) {
+          delete this.sections[0].notes[note.y + i][note.x + note.duration];
+        }
+      } else {
+        if (note.y + width > 8) {
+          // too wide don't change the width
+          return;
+        }
+        for (let i = note.width; i < width; i++) {
+          this.sections[0].notes[note.y + i][note.x] = note;
+          if (note.type == NOTE_TYPES.HOLD && note.duration > 0) {
+            this.sections[0].notes[note.y + i][note.x + note.duration] = note;
+          }
+        }
+      }
+      note.width = width;
+    }
+  },
+
   updateNoteType(note, noteType) {
     if (this.hasNote(note) && note.type != noteType) {
       if (note.type == NOTE_TYPES.HOLD && note.duration > 0) {
