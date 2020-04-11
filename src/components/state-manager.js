@@ -1,3 +1,4 @@
+import { Point } from "pixi.js";
 import { State } from "../models/state";
 import { Note } from "../models/note";
 import findNote from "../utils/search";
@@ -13,6 +14,7 @@ export const StateManager = (graphics, app, ui) => ({
 
   init() {
     ui.init(this);
+    this.loadState();
     app.ticker.add(() => {
       if (!this.ui.audio.paused && this.state.sections[0].bpm) {
         this.audioTime += app.ticker.elapsedMS;
@@ -22,6 +24,32 @@ export const StateManager = (graphics, app, ui) => ({
         );
       }
     });
+  },
+
+  loadState() {
+    const savedState = localStorage.getItem("savedState");
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      this.setBpm(state.bpm);
+      this.setDuration(state.duration);
+      this.ui.setBeatmapProperties(state.bpm, state.duration);
+      for (let note of state.notes) {
+        this.addNote(Note(note[0], note[1], note[2], note[3], note[4]));
+      }
+    }
+  },
+
+  saveState() {
+    localStorage.setItem(
+      "savedState",
+      JSON.stringify({
+        bpm: this.state.sections[0].bpm,
+        duration: this.state.sections[0].duration,
+        notes: this.state
+          .getSortedNoteArray(0)
+          .map(note => [note.type, note.x, note.y, note.width, note.duration])
+      })
+    );
   },
 
   pasteSelection(x, y) {
@@ -83,8 +111,9 @@ export const StateManager = (graphics, app, ui) => ({
     this.state.selectedNotes.add(note.getCoordinates());
     if (this.state.selectedNotes.size == 1) {
       this.ui.setSelectedNote(note);
+    } else {
+      this.ui.setSelectedNotesDisabled(false);
     }
-    this.ui.setSelectedNotesDisabled(false);
   },
 
   selectNext() {
@@ -118,6 +147,7 @@ export const StateManager = (graphics, app, ui) => ({
       this.state.updateNoteWidth(note, width);
       this.graphics.updateNote(note, this.state.sections[0].bpm);
     }
+    this.saveState();
   },
 
   setSelectedNoteType(type) {
@@ -126,6 +156,7 @@ export const StateManager = (graphics, app, ui) => ({
       this.state.updateNoteType(note, type);
       this.graphics.updateNote(note, this.state.sections[0].bpm);
     }
+    this.saveState();
   },
 
   setSelectedNoteDuration(duration) {
@@ -136,11 +167,13 @@ export const StateManager = (graphics, app, ui) => ({
         this.graphics.updateNote(note, this.state.sections[0].bpm);
       }
     }
+    this.saveState();
   },
 
   addNote(note) {
     this.state.addNote(note);
     this.graphics.createNote(note, this.state.sections[0].bpm);
+    this.saveState();
   },
 
   // TODO support different note types
@@ -153,11 +186,13 @@ export const StateManager = (graphics, app, ui) => ({
     );
     this.state.addNote(newNote);
     this.graphics.createNote(newNote, this.state.sections[0].bpm);
+    this.saveState();
   },
 
   removeNote(note) {
     this.state.deleteNote(note);
     this.graphics.destroyNote(note);
+    this.saveState();
   },
 
   removeSelectedNotes() {
@@ -203,10 +238,7 @@ export const StateManager = (graphics, app, ui) => ({
 
   getNoteUnderCursor() {
     console.log(this.state);
-    const targetPosition = this.graphics.viewport.toWorld(
-      this.state.placementPoint.x,
-      this.state.placementPoint.y
-    );
+    const targetPosition = this.state.placementPoint.clone();
     const millisecondsPerXUnit =
       60000 / this.graphics.beatWidth / this.state.sections[0].bpm;
     targetPosition.x = Math.round(targetPosition.x * millisecondsPerXUnit);
@@ -247,7 +279,7 @@ export const StateManager = (graphics, app, ui) => ({
       targetWorldX = Math.round(worldPoint.x / snapX) * snapX;
     }
 
-    this.state.placementPoint = this.graphics.viewport.toScreen(
+    this.state.placementPoint = new Point(
       targetWorldX,
       targetWorldY
     );
@@ -265,6 +297,7 @@ export const StateManager = (graphics, app, ui) => ({
 
   toggleSnap() {
     this.state.snapEnabled = !this.state.snapEnabled;
+    this.ui.setSnapEnabled(this.state.snapEnabled);
   },
 
   setAudioTime(seconds) {

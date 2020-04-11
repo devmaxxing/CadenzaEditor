@@ -22,9 +22,10 @@ export const GraphicsManager = app => {
     });
 
   viewport.addChild(graphics);
+  viewport.addChild(overlayGraphics);
+  viewport.moveCenter(0, 0);
   app.stage.addChild(viewport);
   app.stage.addChild(fixedGraphics);
-  app.stage.addChild(overlayGraphics);
 
   // draw audio line
   fixedGraphics.lineStyle(1, 0xffffff);
@@ -33,7 +34,7 @@ export const GraphicsManager = app => {
 
   return {
     beatWidth: 120,
-    viewportOffsetY: 20,
+    viewportOffsetY: 0,
     viewport: viewport,
     graphics: graphics,
     overlayGraphics: overlayGraphics,
@@ -44,7 +45,7 @@ export const GraphicsManager = app => {
     },
 
     getStartY() {
-      return -viewport.worldHeight / 2;
+      return -(viewport.screenHeight - viewport.worldHeight) / 2;
     },
 
     getNoteLaneHeight() {
@@ -62,7 +63,7 @@ export const GraphicsManager = app => {
       overlayGraphics.beginFill(fillColor);
       overlayGraphics.drawRect(
         placementPoint.x - 2,
-        placementPoint.y,
+        this.getKeyAtY(placementPoint.y) * this.getNoteLaneHeight() + this.getStartY() + 1,
         5,
         this.getNoteLaneHeight() * noteWidth
       );

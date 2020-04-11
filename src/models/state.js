@@ -2,7 +2,7 @@ import { Point } from "pixi.js";
 import { NOTE_TYPES } from "../constants/note-types";
 
 export const State = () => ({
-  snapEnabled: false,
+  snapEnabled: true,
   snapInterval: 1,
   currentNoteWidth: 1,
   currentNoteType: NOTE_TYPES.HIT,

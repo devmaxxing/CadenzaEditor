@@ -8,7 +8,7 @@ const app = new Application({
   height: 640,
   width: window.innerWidth - 20
 });
-document.body.appendChild(app.view);
+document.querySelector("#canvas-container").appendChild(app.view);
 
 // Init graphics
 const graphics = GraphicsManager(app);

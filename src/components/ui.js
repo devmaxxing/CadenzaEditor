@@ -94,39 +94,6 @@ export const UI = () => ({
       FileSaver.saveAs(blob, "beatmap.json");
     };
 
-    // document.getElementById("import-midi").onchange = function() {
-    //   const file = this.files[0];
-    //   const reader = new FileReader();
-    //   reader.onload = function(e) {
-    //     const beatmap = MidiConverter.convert(reader.result, "upper", "lower");
-    //     // set the song
-    //     document.getElementById("song").value = beatmap.song;
-
-    //     // process each section
-    //     // TODO process more than one section
-    //     const section = beatmap.sections[0];
-
-    //     document.getElementById("bpm").value = section.bpm;
-    //     sections[0].bpm = section.bpm;
-
-    //     document.getElementById("duration").value = section.duration;
-    //     sections[0].duration = section.duration;
-    //     const startY = (-1 * viewport.worldHeight) / 2;
-
-    //     for (let note of section.notes) {
-    //       //console.log(note);
-    //       const targetX = (note[2] / 60000) * section.bpm * beatWidth; //convert time in milliseconds to pixels
-    //       const targetY = note[1] * 80 + startY;
-    //       let noteWidth = 1;
-    //       if (note.length > 3) {
-    //         noteWidth = note[3];
-    //       }
-    //       addNote(createNote(targetX, targetY, noteWidth));
-    //     }
-    //   };
-    //   reader.readAsBinaryString(file);
-    // };
-
     document.getElementById("import-file").onchange = function(e) {
       const file = this.files[0];
       const reader = new FileReader();
@@ -163,6 +130,10 @@ export const UI = () => ({
       reader.readAsText(file);
     };
 
+    document.getElementById("snap-input").onchange = function(e) {
+      stateManager.toggleSnap();
+    },
+
     document.getElementById("clear-button").onclick = function(e) {
       stateManager.removeAllNotes();
     };
@@ -177,15 +148,24 @@ export const UI = () => ({
     );
   },
 
-  setSelectedNotesDisabled(disabled) {
+  setSnapEnabled(isSnapEnabled) {
+    document.getElementById("snap-input").checked = isSnapEnabled;
+  },
+
+  setBeatmapProperties(bpm, duration) {
+    document.getElementById("bpm").value = bpm;
+    document.getElementById("duration").value = duration;
+  },
+
+  setSelectedNotesDisabled(disabled, disableDuration = false) {
     document.getElementById("selected-note-type").disabled = disabled;
-    document.getElementById("selected-note-duration").disabled = disabled;
+    document.getElementById("selected-note-duration").disabled = disabled || disableDuration;
     document.getElementById("selected-note-start-time").disabled = disabled;
     document.getElementById("selected-note-width").disabled = disabled;
   },
 
   setSelectedNote(note) {
-    this.setSelectedNotesDisabled(false);
+    this.setSelectedNotesDisabled(false, note.type != NOTE_TYPES.HOLD);
     document.getElementById("selected-note-type").value = note.type;
     document.getElementById("selected-note-duration").value = note.duration;
     document.getElementById("selected-note-start-time").value = note.x;
