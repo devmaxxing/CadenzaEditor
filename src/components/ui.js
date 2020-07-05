@@ -1,4 +1,5 @@
 const FileSaver = require("file-saver");
+const JSZip = require("jszip");
 import { Note } from "../models/note";
 import { NOTE_TYPES } from "../constants/note-types";
 
@@ -30,6 +31,7 @@ export const UI = () => ({
       this.audio.src = URL.createObjectURL(
         document.getElementById("import-audio").files[0]
       );
+      document.getElementById("song").value = document.getElementById("import-audio").files[0].name;
     };
 
     document.getElementById("selected-note-type").onchange = function() {
@@ -64,7 +66,7 @@ export const UI = () => ({
       stateManager.setDuration(parseFloat(this.value));
     };
 
-    document.getElementById("export-button").onclick = function(e) {
+    document.getElementById("export-button").onclick = () => {
       // build the beatmap file
       const sections = stateManager.state.sections;
       const beatmap = {
@@ -91,7 +93,15 @@ export const UI = () => ({
       const blob = new Blob([JSON.stringify(beatmap)], {
         type: "text/plain;charset=utf-8"
       });
-      FileSaver.saveAs(blob, "beatmap.json");
+
+      // zip file with music
+      const zip = new JSZip();
+      const songName = beatmap.song.replace(/\.[^/.]+$/, "");
+      zip.file(songName + ".json", blob);
+      fetch(this.audio.src).then(r => {
+        zip.file(beatmap.song, r.blob());
+        zip.generateAsync({type:"blob"}).then(file => FileSaver.saveAs(file, songName + ".zip"));
+      });
     };
 
     document.getElementById("import-file").onchange = function(e) {
