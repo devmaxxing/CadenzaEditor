@@ -104,40 +104,53 @@ export const UI = () => ({
       });
     };
 
-    document.getElementById("import-file").onchange = function(e) {
-      const file = this.files[0];
+    document.getElementById("import-file").onchange = () => {
+      const file = document.getElementById("import-file").files[0];
       const reader = new FileReader();
-      reader.onload = function(e) {
-        const beatmap = JSON.parse(reader.result);
-        // set the song
-        document.getElementById("song").value = beatmap.song;
-
-        // process each section
-        // TODO process more than one section
-        const section = beatmap.sections[0];
-
-        document.getElementById("bpm").value = section.bpm;
-        stateManager.setBpm(section.bpm);
-
-        document.getElementById("duration").value = section.duration;
-        stateManager.setDuration(section.duration);
-
-        for (let note of section.notes) {
-          //console.log(note);
-          const noteType = note[0];
-          const noteKey = note[1];
-          const noteTime = note[2];
-          const noteWidth = note[3];
-          let noteDuration = 0;
-          if (noteType == NOTE_TYPES.HOLD) {
-            noteDuration = note[4] - noteTime;
-          }
-          stateManager.addNote(
-            Note(noteType, noteTime, noteKey, noteWidth, noteDuration)
-          );
-        }
+      reader.onload = () => {
+        const zip = new JSZip();
+        zip.loadAsync(reader.result).then(() => {
+          zip.forEach((path, file) => {
+            if (path.endsWith(".json")) {
+              file.async("text").then(text => {
+                const beatmap = JSON.parse(text);
+                // set the song
+                document.getElementById("song").value = beatmap.song;
+  
+                // process each section
+                // TODO process more than one section
+                const section = beatmap.sections[0];
+  
+                document.getElementById("bpm").value = section.bpm;
+                stateManager.setBpm(section.bpm);
+  
+                document.getElementById("duration").value = section.duration;
+                stateManager.setDuration(section.duration);
+  
+                for (let note of section.notes) {
+                  //console.log(note);
+                  const noteType = note[0];
+                  const noteKey = note[1];
+                  const noteTime = note[2];
+                  const noteWidth = note[3];
+                  let noteDuration = 0;
+                  if (noteType == NOTE_TYPES.HOLD) {
+                    noteDuration = note[4] - noteTime;
+                  }
+                  stateManager.addNote(
+                    Note(noteType, noteTime, noteKey, noteWidth, noteDuration)
+                  );
+                }
+              });
+            } else {
+              file.async("blob").then(blob => {
+                this.audio.src = URL.createObjectURL(blob);
+              });
+            }
+          });
+        });
       };
-      reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
     };
 
     document.getElementById("snap-input").onchange = function(e) {
