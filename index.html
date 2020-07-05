@@ -35,23 +35,29 @@
         <input name="bpm" id="bpm" value="120" />
       </div>
       <div class="container">
-        <label for="snap-interval">Snap interval (notes per beat)</label>
-        <input
-          name="snap-interval"
-          id="snap-interval"
-          type="number"
-          step="1"
-          min="1"
-          value="1"
-        />
-      </div>
-      <div class="container">
         <label for="duration">Duration (seconds)</label>
         <input name="duration" id="duration" value="120" />
       </div>
       <div class="container">
         <label for="song">Song</label>
         <input name="song" id="song" />
+      </div>
+      <div class="container">
+        <label for="artist">Artist</label>
+        <input name="artist" id="artist" />
+      </div>
+      <div class="container">
+        <label for="mapper">Mapped By</label>
+        <input name="mapper" id="mapper" />
+      </div>
+      <div class="container">
+        <label for="image">Image</label>
+        <input
+          name="image"
+          id="image"
+          type="file"
+          accept="image/png, image/jpeg"
+        />
       </div>
     </div>
     
@@ -159,8 +165,53 @@
         />
       </div>
       <div class="container">
+        <label for="snap-interval">Snap interval (notes per beat)</label>
+        <input
+          name="snap-interval"
+          id="snap-interval"
+          type="number"
+          step="1"
+          min="1"
+          value="1"
+        />
+      </div>
+      <div class="container">
         <button id="clear-button">Clear Notes</button>
       </div>
+    </div>
+
+    <div>
+      <b>Inputs</b>
+      <table>
+        <tr>
+          <td>LEFT_CLICK</td>
+          <td>Place note/Select note at cursor</td>
+        </tr>
+        <tr>
+          <td>SHIFT + LEFT_CLICK</td>
+          <td>Add note at cursor to selection</td>
+        </tr>
+        <tr>
+          <td>CTRL + LEFT_CLICK</td>
+          <td>Copy and paste selected notes with top left note placed underneath the cursor</td>
+        </tr>
+        <tr>
+          <td>d</td>
+          <td>Deselect all</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td>Remove selected notes</td>
+        </tr>
+        <tr>
+          <td>s</td>
+          <td>Toggle Snap</td>
+        </tr>
+        <tr>
+          <td>SHIFT + RIGHT_ARROW</td>
+          <td>Expand selection to next note</td>
+        </tr>
+      </table>
     </div>
     <script src="main.js"></script>
   </body>
