@@ -74,6 +74,7 @@ export const UI = () => ({
         songFile: document.getElementById("import-audio").files[0].name,
         artist: document.getElementById("artist").value,
         mapper: document.getElementById("mapper").value,
+        difficulty: 0, // defaulting to EASY for now
         sections: sections.map((section, i) => {
           let obj = {
             bpm: section.bpm,
@@ -127,6 +128,9 @@ export const UI = () => ({
                 const beatmap = JSON.parse(text);
                 // set the song
                 document.getElementById("song").value = beatmap.song;
+
+                // set artist
+                document.getElementById("artist").value = beatmap.artist;
   
                 // process each section
                 // TODO process more than one section
