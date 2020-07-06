@@ -72,6 +72,7 @@ export const UI = () => ({
       const beatmap = {
         song: document.getElementById("song").value,
         songFile: document.getElementById("import-audio").files[0].name,
+        image: "",
         artist: document.getElementById("artist").value,
         mapper: document.getElementById("mapper").value,
         difficulty: 0, // defaulting to EASY for now
@@ -93,6 +94,11 @@ export const UI = () => ({
         })
       };
 
+      const imageFile = document.getElementById("image").files[0];
+      if (imageFile) {
+        beatmap.image = imageFile.name;
+      }
+
       // export file
       const blob = new Blob([JSON.stringify(beatmap)], {
         type: "text/plain;charset=utf-8"
@@ -104,7 +110,6 @@ export const UI = () => ({
       zip.file(songName + ".json", blob);
       fetch(this.audio.src).then(r => {
         zip.file(beatmap.songFile, r.blob());
-        const imageFile = document.getElementById("image").files[0];
         if (imageFile) {
           fetch(URL.createObjectURL(imageFile)).then(r => {
             zip.file(imageFile.name, r.blob());
