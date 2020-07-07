@@ -67,6 +67,10 @@ export const UI = () => ({
     };
 
     document.getElementById("export-button").onclick = () => {
+      if (document.getElementById("import-audio").files.length == 0) {
+        alert("Please import an audio file");
+        return;
+      }
       // build the beatmap file
       const sections = stateManager.state.sections;
       const beatmap = {
